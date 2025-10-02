@@ -58,9 +58,12 @@
         "upsell_popup": {
           "type": "upsell-popup",
           "settings": {
+            "upsell_product": "nike-everyday-plus",
+            "upsell_product_2": "nike-t-shirt",
             "show_atc_popup": true,
             "show_atc_popup_image": true,
-            "show_atc_popup_once": false
+            "show_atc_popup_once": false,
+            "atc_popup_heading": "Complete your purchase"
           }
         }
       },

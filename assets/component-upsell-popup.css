@@ -19,9 +19,6 @@
   opacity: 1;
   visibility: visible;
   z-index: 9999 !important;
-}
-
-.atc-modal[open] {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -68,6 +65,13 @@
   height: 2.4rem;
 }
 
+.atc-modal__body {
+  display: flex;
+  gap: 2rem;
+  padding: 40px;
+  align-items: flex-start;
+}
+
 .atc-modal__title {
   color: #05117F;
   font-size: 28px;
@@ -76,29 +80,9 @@
   letter-spacing: -0.5px;
 }
 
-.atc-modal__badge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #3b82f6;
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.4rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.atc-modal__body {
-  display: flex;
-  gap: 2rem;
-  padding: 40px;
-  align-items: flex-start;
-}
-
 .atc-modal__main-product {
   text-align: left;
-  margin-top: 32px;
-  margin-bottom: 32px;
+  margin: 32px 0;
 }
 
 .atc-modal__adding-text {
@@ -117,17 +101,6 @@
   margin: 0;
 }
 
-.atc-modal__pricing .atc-modal__original-price {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.atc-modal__pricing .atc-modal__sale-price {
-  font-size: 20px;
-  font-weight: 700;
-  color: #05117F;
-}
-
 .atc-modal__upsell-products {
   gap: 2rem;
   margin-bottom: 2.5rem;
@@ -140,42 +113,15 @@
   flex: 1;
 }
 
+.atc-modal__product-item:first-child {
+  margin-bottom: 16px;
+}
+
 .atc-modal__upsell-product-image {
   border-radius: 0.6rem;
   object-fit: cover;
   width: 8rem;
   height: 8rem;
-}
-
-.atc-modal__add-to-cart {
-  background-color: #05117F;
-  color: white;
-  padding: 10px 15px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.atc-modal__add-to-cart:hover {
-  background: white;
-  color: #05117F;
-  border: 1px solid #05117F;
-  transition: all 0.2s ease;
-}
-
-.atc-modal__continue-cart {
-  background-color: white;
-  color: #05117F;
-  border: 1px solid #05117F;
-  padding: 10px 15px;
-  text-align: center;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.atc-modal__continue-cart:hover {
-  background: #05117F;
-  color: white;
 }
 
 .atc-modal__product-details h4 {
@@ -205,14 +151,17 @@
   align-items: center;
 }
 
+.atc-modal__pricing .atc-modal__sale-price,
 .atc-modal__sale-price {
-  font-size: 1.6rem;
+  font-size: 20px;
   font-weight: 700;
-  color: #111827;
+  color: #05117F;
 }
 
+.atc-modal__pricing .atc-modal__original-price,
 .atc-modal__original-price {
-  font-size: 1.4rem;
+  font-size: 20px;
+  font-weight: 700;
   color: #9ca3af;
   text-decoration: line-through;
 }
@@ -223,22 +172,36 @@
   justify-content: center;
 }
 
-.atc-modal__actions .button {
-  min-width: 16rem;
-  padding: 1.2rem 2.4rem;
-  font-size: 12px;
-  line-height: 16px;
-  border-radius: 5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  display: inline-block;
+.atc-modal__add-to-cart {
+  background-color: #05117F;
+  color: white;
+  padding: 10px 15px;
   text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
 }
 
-.atc-modal__product-item:first-child {
-  margin-bottom: 16px;
+.atc-modal__add-to-cart:hover {
+  background: white;
+  color: #05117F;
+  border: 1px solid #05117F;
+}
+
+.atc-modal__continue-cart {
+  background-color: white;
+  color: #05117F;
+  border: 1px solid #05117F;
+  padding: 10px 15px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.atc-modal__continue-cart:hover {
+  background: #05117F;
+  color: white;
 }
 
 @media screen and (min-width: 769px) and (max-width: 875px) {
@@ -265,7 +228,7 @@
   .atc-modal__close {
     top: 16px;
     right: 16px;
-    border-radius: 9999px;
+    border-radius: 50%;
     padding: 12px;
     border: 1px solid black;
     background-color: white;
@@ -275,15 +238,11 @@
     display: flex;
   }
 
-  .atc-modal__close:hover {
-    opacity: 0.7;
-  }
-
   .atc-modal__body {
     height: 100vh;
     overflow-y: auto;
     flex-direction: column;
-    padding: 40px;
+    padding: 40px 16px;
     gap: 1.5rem;
   }
 
@@ -300,17 +259,7 @@
   .atc-modal__upsell-product-image {
     aspect-ratio: 1/1;
   }
-  
-  .atc-modal__header {
-    padding: 1.5rem;
-  }
-  
-  
-  .atc-modal__badge {
-    font-size: 1rem;
-    padding: 0.3rem 0.6rem;
-  }
-  
+
   .atc-modal__body > img {
     aspect-ratio: 1/1;
     align-self: center;
@@ -318,11 +267,5 @@
 
   .atc-modal__actions {
     flex-direction: column;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .atc-modal__body {
-    padding: 40px 16px;
   }
 }

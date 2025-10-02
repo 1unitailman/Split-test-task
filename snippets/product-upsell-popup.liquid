@@ -114,9 +114,13 @@
             >
               Add to Cart
             </atc-modal-btn>
-            <a href="{{ routes.cart_url }}" class="atc-modal__continue-cart button--secondary">
+            <atc-modal-btn
+              class="atc-modal__continue-cart button--secondary"
+              data-section-id="{{ section.id }}"
+              data-main-product-only="true"
+            >
               Continue to the Cart
-            </a>
+            </atc-modal-btn>
           </div>
         </div>
       </div>

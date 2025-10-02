@@ -651,29 +651,19 @@ class ATCModalBtn extends HTMLElement {
   }
 
   connectedCallback() {
-    if (!this.hasAttribute('role')) {
-      this.setAttribute('role', 'button');
-    }
-    if (!this.hasAttribute('tabindex')) {
-      this.setAttribute('tabindex', '0');
-    }
+    if (!this.hasAttribute('role')) this.setAttribute('role', 'button');
+    if (!this.hasAttribute('tabindex')) this.setAttribute('tabindex', '0');
   }
 
   handleClick(event) {
     event.preventDefault();
     
+    if (this.hasAttribute('disabled') || this.classList.contains('loading')) return;
+    
     const sectionId = this.getAttribute('data-section-id');
     const modalElement = this.closest('modal-dialog');
     
-    if (!sectionId) {
-      console.error('ATCModalBtn: data-section-id attribute is required');
-      return;
-    }
-
-    if (!modalElement) {
-      console.error('ATCModalBtn: modal-dialog parent not found');
-      return;
-    }
+    if (!sectionId || !modalElement) return;
 
     this.addToCart(sectionId, modalElement);
   }
@@ -684,44 +674,98 @@ class ATCModalBtn extends HTMLElement {
     
     const form = document.querySelector(`#ProductSubmitButton-${sectionId}`);
     if (!form) {
-      console.error(`ATCModalBtn: Form with ID ProductSubmitButton-${sectionId} not found`);
       this.removeLoadingState();
       return;
     }
 
     const formData = new FormData(form.form);
+    const mainProductId = formData.get('id');
+    const quantity = formData.get('quantity') || '1';
+    
+    if (!mainProductId) {
+      this.removeLoadingState();
+      return;
+    }
+    
+    const productsToAdd = [{
+      id: mainProductId,
+      quantity: parseInt(quantity) || 1
+    }];
+    
+    const upsellProduct1Id = this.getAttribute('data-upsell-product-1');
+    const upsellProduct2Id = this.getAttribute('data-upsell-product-2');
+    
+    if (upsellProduct1Id?.trim()) {
+      productsToAdd.push({ id: upsellProduct1Id.trim(), quantity: 1 });
+    }
+    
+    if (upsellProduct2Id?.trim()) {
+      productsToAdd.push({ id: upsellProduct2Id.trim(), quantity: 1 });
+    }
+    
+    this.addMultipleProductsToCart(productsToAdd, modalElement);
+  }
+
+  addMultipleProductsToCart(products, modalElement) {
+    const items = products.map(product => ({
+      id: product.id,
+      quantity: product.quantity
+    }));
     
     fetch('/cart/add.js', {
       method: 'POST',
-      body: formData,
       headers: {
+        'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
-      }
+      },
+      body: JSON.stringify({ items })
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json().then(errorData => {
+          throw new Error(errorData.message || errorData.description || `HTTP ${response.status}`);
+        });
       }
       return response.json();
     })
-    .then(data => {
+    .then(result => {
       modalElement.hide();
+      
       this.dispatchEvent(new CustomEvent('atc:success', { 
-        detail: data,
+        detail: { 
+          products: Array.isArray(result) ? result : [result], 
+          count: items.length
+        },
         bubbles: true 
       }));
       
-      document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
+      fetch('/cart.js')
+        .then(response => response.json())
+        .then(cart => {
+          publish(PUB_SUB_EVENTS.cartUpdate, {
+            source: 'upsell-modal',
+            cartData: cart,
+            productVariantId: products[0].id
+          });
+          
+          const cartDrawer = document.querySelector('cart-drawer');
+          const cartNotification = document.querySelector('cart-notification');
+          
+          if (cartDrawer?.renderContents) {
+            cartDrawer.renderContents(cart);
+          } else if (cartNotification?.renderContents) {
+            cartNotification.renderContents(cart);
+          }
+        });
     })
     .catch(error => {
-      console.error('Error adding to cart:', error);
-      
       this.dispatchEvent(new CustomEvent('atc:error', { 
         detail: error,
         bubbles: true 
       }));
       
-      form.form.submit();
+      const form = document.querySelector(`#ProductSubmitButton-${this.getAttribute('data-section-id')}`);
+      if (form?.form) form.form.submit();
     })
     .finally(() => {
       this.removeLoadingState();

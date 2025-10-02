@@ -1,8 +1,10 @@
-{%  liquid 
+{% liquid
   assign upsell_product = block.settings.upsell_product
   assign upsell_product_2 = block.settings.upsell_product_2
+
   assign total_discount = 0
-  if upsell_product and upsell_product.compare_at_price and upsell_product.price 
+
+  if upsell_product and upsell_product.compare_at_price and upsell_product.price
     assign product_1_discount = upsell_product.price | minus: upsell_product.compare_at_price
     assign total_discount = total_discount | plus: product_1_discount
   endif
@@ -40,7 +42,7 @@
           >
         {% endif %}
         <div class="atc-modal__info">
-          <h2 class="atc-modal__title">{{ 'general.popup.complete_your_purchase' | t | upcase }}</h2>
+          <h2 class="atc-modal__title">{{ block.settings.atc_popup_heading | upcase }}</h2>
 
           <div class="atc-modal__main-product">
             <p class="atc-modal__adding-text">
@@ -51,42 +53,55 @@
             </p>
           </div>
 
-          {% if upsell_product and upsell_product_2 %}
+          {% if upsell_product or upsell_product_2 %}
             <div class="atc-modal__upsell-products">
-              <div class="atc-modal__product-item">
-                <img
-                  class="atc-modal__upsell-product-image"
-                  src="{{ upsell_product.featured_media | image_url: width: 80 }}"
-                  alt="{{ upsell_product.featured_media.alt | escape }}"
-                  width="80"
-                  height="80"
-                >
-                <div class="atc-modal__product-details">
-                  <h4>{{ upsell_product.title }}</h4>
-                  <p>{{ upsell_product.description }}</p>
-                  <div class="atc-modal__pricing">
-                    <p class="atc-modal__sale-price">{{ upsell_product.compare_at_price | money_without_trailing_zeros }}</p>
-                    <p class="atc-modal__original-price">{{ upsell_product.price | money_without_trailing_zeros }}</p>
+              {% if upsell_product != blank %}
+                <div class="atc-modal__product-item">
+                  <img
+                    class="atc-modal__upsell-product-image"
+                    src="{{ upsell_product.featured_media | image_url: width: 80 }}"
+                    alt="{{ upsell_product.featured_media.alt | escape }}"
+                    width="80"
+                    height="80"
+                  />
+                  <div class="atc-modal__product-details">
+                    <h4>{{ upsell_product.title }}</h4>
+                    <p>{{ upsell_product.description }}</p>
+                    <div class="atc-modal__pricing">
+                      <p class="atc-modal__sale-price">
+                        {{ upsell_product.compare_at_price | money_without_trailing_zeros }}
+                      </p>
+                      <p class="atc-modal__original-price">
+                        {{ upsell_product.price | money_without_trailing_zeros }}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="atc-modal__product-item">
-                <img
-                  class="atc-modal__upsell-product-image"
-                  src="{{ upsell_product_2.featured_media | image_url: width: 80 }}"
-                  alt="{{ upsell_product_2.featured_media.alt | escape }}"
-                  width="80"
-                  height="80"
-                >
-                <div class="atc-modal__product-details">
-                  <h4>{{ upsell_product_2.title }}</h4>
-                  <p>{{ upsell_product_2.description }}</p>
-                  <div class="atc-modal__pricing">
-                    <p class="atc-modal__sale-price">{{ upsell_product.compare_at_price | money_without_trailing_zeros }}</p>
-                    <p class="atc-modal__original-price">{{ upsell_product.price | money_without_trailing_zeros }}</p>
+              {% endif %}
+
+              {% if upsell_product_2 != blank %}
+                <div class="atc-modal__product-item">
+                  <img
+                    class="atc-modal__upsell-product-image"
+                    src="{{ upsell_product_2.featured_media | image_url: width: 80 }}"
+                    alt="{{ upsell_product_2.featured_media.alt | escape }}"
+                    width="80"
+                    height="80"
+                  >
+                  <div class="atc-modal__product-details">
+                    <h4>{{ upsell_product_2.title }}</h4>
+                    <p>{{ upsell_product_2.description }}</p>
+                    <div class="atc-modal__pricing">
+                      <p class="atc-modal__sale-price">
+                        {{ upsell_product_2.compare_at_price | money_without_trailing_zeros }}
+                      </p>
+                      <p class="atc-modal__original-price">
+                        {{ upsell_product_2.price | money_without_trailing_zeros }}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              {% endif %}
             </div>
           {% endif %}
 
@@ -94,6 +109,8 @@
             <atc-modal-btn
               class="atc-modal__add-to-cart button--primary"
               data-section-id="{{ section.id }}"
+              {% if upsell_product and upsell_product.selected_or_first_available_variant %}data-upsell-product-1="{{ upsell_product.selected_or_first_available_variant.id }}"{% endif %}
+              {% if upsell_product_2 and upsell_product_2.selected_or_first_available_variant %}data-upsell-product-2="{{ upsell_product_2.selected_or_first_available_variant.id }}"{% endif %}
             >
               Add to Cart
             </atc-modal-btn>

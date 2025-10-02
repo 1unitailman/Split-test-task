@@ -1,0 +1,108 @@
+{%  liquid 
+  assign upsell_product = block.settings.upsell_product
+  assign upsell_product_2 = block.settings.upsell_product_2
+  assign total_discount = 0
+  if upsell_product and upsell_product.compare_at_price and upsell_product.price 
+    assign product_1_discount = upsell_product.price | minus: upsell_product.compare_at_price
+    assign total_discount = total_discount | plus: product_1_discount
+  endif
+  if upsell_product_2 and upsell_product_2.compare_at_price and upsell_product_2.price
+    assign product_2_discount = upsell_product_2.price | minus: upsell_product_2.compare_at_price
+    assign total_discount = total_discount | plus: product_2_discount
+  endif
+%}
+
+{%- if block.settings.show_atc_popup -%}
+  <modal-dialog id="ATCModal-{{ section.id }}" class="atc-modal" {{ block.shopify_attributes }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      class="atc-modal__content"
+      tabindex="-1"
+    >
+      <button
+        id="ModalClose-{{ section.id }}"
+        type="button"
+        class="atc-modal__close"
+        onclick="this.closest('modal-dialog').hide()"
+      >
+        {% render 'close-icon' %}
+      </button>
+
+      <div class="atc-modal__body">
+        {% if block.settings.show_atc_popup_image %}
+          <img
+            class="atc-modal__product-image"
+            src="{{ product.featured_media | image_url: width: 415 }}"
+            alt="{{ product.featured_media.alt | escape }}"
+            width="415"
+            height="415"
+          >
+        {% endif %}
+        <div class="atc-modal__info">
+          <h2 class="atc-modal__title">{{ 'general.popup.complete_your_purchase' | t | upcase }}</h2>
+
+          <div class="atc-modal__main-product">
+            <p class="atc-modal__adding-text">
+              You are trying to add <strong>{{ product.title }}</strong> to the cart.
+            </p>
+            <p class="atc-modal__suggestion">
+              Complete your look and save <strong>{{ total_discount | money }}</strong>
+            </p>
+          </div>
+
+          {% if upsell_product and upsell_product_2 %}
+            <div class="atc-modal__upsell-products">
+              <div class="atc-modal__product-item">
+                <img
+                  class="atc-modal__upsell-product-image"
+                  src="{{ upsell_product.featured_media | image_url: width: 80 }}"
+                  alt="{{ upsell_product.featured_media.alt | escape }}"
+                  width="80"
+                  height="80"
+                >
+                <div class="atc-modal__product-details">
+                  <h4>{{ upsell_product.title }}</h4>
+                  <p>{{ upsell_product.description }}</p>
+                  <div class="atc-modal__pricing">
+                    <p class="atc-modal__sale-price">{{ upsell_product.compare_at_price | money_without_trailing_zeros }}</p>
+                    <p class="atc-modal__original-price">{{ upsell_product.price | money_without_trailing_zeros }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="atc-modal__product-item">
+                <img
+                  class="atc-modal__upsell-product-image"
+                  src="{{ upsell_product_2.featured_media | image_url: width: 80 }}"
+                  alt="{{ upsell_product_2.featured_media.alt | escape }}"
+                  width="80"
+                  height="80"
+                >
+                <div class="atc-modal__product-details">
+                  <h4>{{ upsell_product_2.title }}</h4>
+                  <p>{{ upsell_product_2.description }}</p>
+                  <div class="atc-modal__pricing">
+                    <p class="atc-modal__sale-price">{{ upsell_product.compare_at_price | money_without_trailing_zeros }}</p>
+                    <p class="atc-modal__original-price">{{ upsell_product.price | money_without_trailing_zeros }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="atc-modal__actions">
+            <atc-modal-btn
+              class="atc-modal__add-to-cart button--primary"
+              data-section-id="{{ section.id }}"
+            >
+              Add to Cart
+            </atc-modal-btn>
+            <a href="{{ routes.cart_url }}" class="atc-modal__continue-cart button--secondary">
+              Continue to the Cart
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </modal-dialog>
+{%- endif -%}

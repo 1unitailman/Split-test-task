@@ -644,6 +644,98 @@ class ModalDialog extends HTMLElement {
 }
 customElements.define('modal-dialog', ModalDialog);
 
+class ATCModalBtn extends HTMLElement {
+  constructor() {
+    super();
+    this.addEventListener('click', this.handleClick.bind(this));
+  }
+
+  connectedCallback() {
+    if (!this.hasAttribute('role')) {
+      this.setAttribute('role', 'button');
+    }
+    if (!this.hasAttribute('tabindex')) {
+      this.setAttribute('tabindex', '0');
+    }
+  }
+
+  handleClick(event) {
+    event.preventDefault();
+    
+    const sectionId = this.getAttribute('data-section-id');
+    const modalElement = this.closest('modal-dialog');
+    
+    if (!sectionId) {
+      console.error('ATCModalBtn: data-section-id attribute is required');
+      return;
+    }
+
+    if (!modalElement) {
+      console.error('ATCModalBtn: modal-dialog parent not found');
+      return;
+    }
+
+    this.addToCart(sectionId, modalElement);
+  }
+
+  addToCart(sectionId, modalElement) {
+    this.classList.add('loading');
+    this.setAttribute('disabled', '');
+    
+    const form = document.querySelector(`#ProductSubmitButton-${sectionId}`);
+    if (!form) {
+      console.error(`ATCModalBtn: Form with ID ProductSubmitButton-${sectionId} not found`);
+      this.removeLoadingState();
+      return;
+    }
+
+    const formData = new FormData(form.form);
+    
+    fetch('/cart/add.js', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      modalElement.hide();
+      this.dispatchEvent(new CustomEvent('atc:success', { 
+        detail: data,
+        bubbles: true 
+      }));
+      
+      document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
+    })
+    .catch(error => {
+      console.error('Error adding to cart:', error);
+      
+      this.dispatchEvent(new CustomEvent('atc:error', { 
+        detail: error,
+        bubbles: true 
+      }));
+      
+      form.form.submit();
+    })
+    .finally(() => {
+      this.removeLoadingState();
+    });
+  }
+
+  removeLoadingState() {
+    this.classList.remove('loading');
+    this.removeAttribute('disabled');
+  }
+}
+
+customElements.define('atc-modal-btn', ATCModalBtn);
+
 class BulkModal extends HTMLElement {
   constructor() {
     super();
